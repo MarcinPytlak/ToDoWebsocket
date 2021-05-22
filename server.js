@@ -4,20 +4,20 @@ const app = express();
 
 const tasks = [];
 
-const server = app.listen(8000, () => {
+const server = app.listen(process.env.PORT || 8000, () => {
     console.log('Server is running on port: 8000');
   });
 
 const io = socket(server);
 
 io.on('connection', (socket) => {
-  socket.on('updateData', tasks); 
-  socket.on('addTask', (taskName) => {
-    let task = taskName.name;
+  socket.on('updateData', ()=>{
+    socket.emit('updateTasks', tasks);
+  }); 
+  socket.on('addTask', ({ id, name }) => {
+    const task = {id, name};
     tasks.push(task);
-
-    let message = {name: taskName.name};
-    socket.broadcast.emit('addTask', message);
+    socket.broadcast.emit('addTask', task);
   });
   socket.on('removeTask', (taskIndex) => {
     tasks.splice(taskIndex, 1);
